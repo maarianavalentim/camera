@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Emaus</title>
+    <script src="https://trackingjs.com/build/tracking.js"></script>
+
+    <style>
+    
+
+        * {
+            margin: 0;
+            border: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html,
+        body {
+            background-color: #F3E3DE;
+            height: 100%;
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #000000;
+            margin-bottom: 20px;
+        }
+
+        .comentar {
+            max-width: 600px;
+            margin: 25px auto;
+            background-color:#E0C7BD;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .botao{
+            background-color: #A66454;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #camera {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+       
+
+        #commentInput {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .botao,
+        .commentButton {
+            background-color: #af7a4c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .commentContainer {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .commentText {
+            margin-bottom: 10px;
+        }
+
+        .commentImage {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .deleteButton {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff0000;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .retanguulo {
+            height: 20px;
+            width: 100%;
+            background-color: #f1f1f1;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <section class="comentar">
+        <h1 class="coment"> Tire aqui uma foto usando um produto comprado na EMAÚS, se preferir deixe sua mensagem de avaliação sobre o produto </h1>
+
+
+        <div id="foto"></div>
+        <div class="buttons">
+            <button class="botao" onclick="abrirCamera()">Abrir Camera</button>
+            <button class="botao" onclick="tirarFoto()">Tirar Foto</button>
+            <button class="botao" onclick="fechar()">Fechar Camera</button>
+        </div>
+        <video id="camera" autoplay></video>
+        
+        <div id="comments">
+            <input type="text" id="commentInput" placeholder="Digite sua Mensagem">
+            <button class="botao" onclick="postarComentario()">Deixar Mensagem</button>
+
+            <div class="retanguulo"></div>
+            <div class="background" id="commentSection"></div>
+        </div>
+
+        <div class="retanguulo"></div>
+    </section>
+
+    <script>
+        var mediaStream;
+        var downloadLink = document.getElementById('downloadLink');
+        var commentInput = document.getElementById('commentInput');
+        var commentSection = document.getElementById('commentSection');
+
+        
+        window.onload = function () {
+            carregarComentarios();
+        };
+
+        function abrirCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                .then(function (stream) {
+                    mediaStream = stream;
+                    const areaVideo = document.getElementById('camera');
+                    areaVideo.srcObject = stream;
+                })
+                .catch(function (error) {
+                    console.error('Erro ao acessar a câmera:', error);
+                });
+        }
+
+        function tirarFoto() {
+            const areaVideo = document.getElementById('camera');
+
+            
+            areaVideo.pause();
+
+            const canvas = document.createElement('canvas');
+            canvas.width = areaVideo.videoWidth;
+            canvas.height = areaVideo.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(areaVideo, 0, 0, canvas.width, canvas.height);
+            const imageDataURL = canvas.toDataURL();
+            const fotoDiv = document.getElementById('foto');
+            fotoDiv.style.backgroundImage = `url(${imageDataURL})`;
+downloadLink.href = imageDataURL;
+            downloadLink.style.display = 'inline-block';
+
+            
+            areaVideo.srcObject = null;
+
+        }
+
+       
+        function iniciarCamera() {
+            
+        }
+
+       
+        function retomarCamera() {
+            
+            iniciarCamera(); 
+        }
+
+        
+        function postarComentario() {
+            const comentario = commentInput.value;
+            if (comentario.trim() !== '') {
+               
+                retomarCamera();
+            }
+        }
+
+
+
+        function fechar() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+
+            const areaVideo = document.getElementById('camera');
+            areaVideo.srcObject = null;
+            mediaStream = null;
+
+            
+            downloadLink.style.display = 'none';
+
+            
+            const fotoDiv = document.getElementById('foto');
+            fotoDiv.style.backgroundImage = 'none';
+        }
+
+
+        function postarComentario() {
+            const comentario = commentInput.value;
+            if (comentario.trim() !== '') {
+                const commentContainer = document.createElement('div');
+                commentContainer.classList.add('commentContainer');
+
+                
+                const commentText = document.createElement('div');
+                commentText.classList.add('commentText');
+                commentText.textContent = comentario;
+                commentContainer.appendChild(commentText);
+
+               
+                const commentImage = document.createElement('img');
+                commentImage.classList.add('commentImage');
+                commentImage.src = document.getElementById('foto').style.backgroundImage.slice(5, -2); // Obtém a URL da imagem
+                commentContainer.appendChild(commentImage);
+
+               
+                const deleteButton = document.createElement('div');
+                deleteButton.classList.add('deleteButton');
+                deleteButton.textContent = 'Excluir';
+                deleteButton.onclick = function () {
+                    commentContainer.remove();
+                    salvarComentarios();
+                };
+                commentContainer.appendChild(deleteButton);
+
+              
+                commentSection.appendChild(commentContainer);
+
+               
+                commentInput.value = '';
+
+            
+                salvarComentarios();
+            }
+        }
+
+
+        function salvarComentarios() {
+            const comentarios = [];
+            const commentDivs = document.getElementById('commentSection').children;
+            for (let i = 0; i < commentDivs.length; i++) {
+                const comentario = {
+                    texto: commentDivs[i].querySelector('.commentText').textContent,
+                    imagem: commentDivs[i].querySelector('.commentImage').src
+                };
+                comentarios.push(comentario);
+            }
+
+           
+            localStorage.setItem('comentarios', JSON.stringify(comentarios));
+        }
+
+        function carregarComentarios() {
+            const comentarios = localStorage.getItem('comentarios');
+            if (comentarios) {
+                const commentDivs = JSON.parse(comentarios);
+                for (let i = 0; i < commentDivs.length; i++) {
+                    const commentContainer = document.createElement('div');
+                    commentContainer.classList.add('commentContainer');
+
+                
+                    const commentText = document.createElement('div');
+                    commentText.classList.add('commentText');
+                    commentText.textContent = commentDivs[i].texto;
+                    commentContainer.appendChild(commentText);
+
+                
+                    const commentImage = document.createElement('img');
+                    commentImage.classList.add('commentImage');
+                    commentImage.src = commentDivs[i].imagem;
+                    commentContainer.appendChild(commentImage);
+
+                
+                    const deleteButton = document.createElement('div');
+                    deleteButton.classList.add('deleteButton');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.onclick = function () {
+                        commentContainer.remove();
+                        salvarComentarios();
+                    };
+                    commentContainer.appendChild(deleteButton);
+
+               
+                    commentSection.appendChild(commentContainer);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
